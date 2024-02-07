@@ -1,5 +1,9 @@
 ![CI Status](https://github.com/duetds/duet-date-picker-prep/workflows/CI/badge.svg) [![NPM Version](https://img.shields.io/npm/v/@duetds/date-picker.svg)](https://www.npmjs.com/package/@duetds/date-picker) ![MIT License](https://img.shields.io/badge/license-MIT-blue.svg) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
+# Update 2024
+
+There's a cleanValue function which was overriding the inputs which have formats like `D. M. YYYY`, This fork adds a flag to skip that logic by default
+
 # Duet Date Picker
 
 Duet Date Picker is an open source version of Duet Design System’s [accessible date picker](https://www.duetds.com/components/date-picker/). Duet Date Picker can be implemented and used across any JavaScript framework or no framework at all. We accomplish this by using standardized web platform APIs and Web Components.
