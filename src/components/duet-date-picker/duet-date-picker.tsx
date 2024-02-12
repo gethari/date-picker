@@ -613,7 +613,7 @@ export class DuetDatePicker implements ComponentInterface {
   }
 
   private setValue(date: Date) {
-    this.value = printISODate(date)
+    //this.value = printISODate(date)
     this.duetChange.emit({
       component: "duet-date-picker",
       value: this.value,
