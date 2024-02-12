@@ -352,7 +352,13 @@ export class DuetDatePicker implements ComponentInterface {
     this.duetOpen.emit({
       component: "duet-date-picker",
     })
-    this.setFocusedDay(parseISODate(this.value) || new Date())
+    let date = new Date();
+    if (this.dateAdapter) {
+      date = this.dateAdapter.parse(this.value, createDate)
+    } else {
+      date = parseISODate(this.value);
+    }
+    this.setFocusedDay(date);
 
     clearTimeout(this.focusTimeoutId)
     this.focusTimeoutId = setTimeout(() => this.monthSelectNode.focus(), TRANSITION_MS)
@@ -636,8 +642,13 @@ export class DuetDatePicker implements ComponentInterface {
    * Always the last one in the class.
    */
   render() {
-    //console.log("Render", this.selectedDates)
-    const valueAsDates = (this.multiple ? this.values : this.value ? [this.value] : []).map(v => parseISODate(v))
+    const valueAsDates = (this.multiple ? this.values : this.value ? [this.value] : []).map(v => {
+      /** If the user has provided adapter use that to achieve respective formatting output*/
+      if (this.dateAdapter) {
+        return this.dateAdapter.parse(v, createDate);
+      }
+      return parseISODate(v)
+    })
     const formattedDate = valueAsDates[0] && this.dateAdapter.format(valueAsDates[0])
     const selectedYear = (valueAsDates[0] || this.focusedDay).getFullYear()
     const focusedMonth = this.focusedDay.getMonth()

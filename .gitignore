@@ -31,3 +31,4 @@ custom-element/*
 *.njsproj
 *.sln
 *.vsix
+**/dist
