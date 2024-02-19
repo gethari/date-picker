@@ -94,7 +94,7 @@ export type DuetDatePickerCloseEvent = {
 }
 export type DuetDatePickerDirection = "left" | "right"
 
-const DISALLOWED_CHARACTERS = /[^0-9\.\/\-]+/g
+const DISALLOWED_CHARACTERS = /[^0-9\.\-\/\s]+/g;
 const TRANSITION_MS = 300
 
 export type DateDisabledPredicate = (date: Date) => boolean
@@ -600,11 +600,7 @@ export class DuetDatePicker implements ComponentInterface {
 
   private handleInputChange = () => {
     const target = this.datePickerInput
-
-    // clean up any invalid characters
-    if (this.cleanInputs) {
-      cleanValue(target, DISALLOWED_CHARACTERS)
-    }
+    cleanValue(target, DISALLOWED_CHARACTERS)
 
     const parsed = this.dateAdapter.parse(target.value, createDate)
     if (parsed || target.value === "") {
