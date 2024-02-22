@@ -1,37 +1,37 @@
 import {
   Component,
   ComponentInterface,
-  Host,
-  Prop,
   Element,
-  h,
   Event,
   EventEmitter,
-  State,
+  Host,
   Listen,
   Method,
+  Prop,
+  State,
   Watch,
+  h,
 } from "@stencil/core"
-import {
-  addDays,
-  startOfWeek,
-  endOfWeek,
-  setMonth,
-  setYear,
-  clamp,
-  inRange,
-  endOfMonth,
-  startOfMonth,
-  printISODate,
-  parseISODate,
-  createIdentifier,
-  DaysOfWeek,
-  createDate,
-} from "./date-utils"
+import isoAdapter, { DuetDateAdapter } from "./date-adapter"
+import defaultLocalization, { DuetLocalizedText } from "./date-localization"
 import { DatePickerInput } from "./date-picker-input"
 import { DatePickerMonth } from "./date-picker-month"
-import defaultLocalization, { DuetLocalizedText } from "./date-localization"
-import isoAdapter, { DuetDateAdapter } from "./date-adapter"
+import {
+  DaysOfWeek,
+  addDays,
+  clamp,
+  createDate,
+  createIdentifier,
+  endOfMonth,
+  endOfWeek,
+  inRange,
+  parseISODate,
+  printISODate,
+  setMonth,
+  setYear,
+  startOfMonth,
+  startOfWeek,
+} from "./date-utils"
 
 function range(from: number, to: number) {
   var result: number[] = []
@@ -94,7 +94,7 @@ export type DuetDatePickerCloseEvent = {
 }
 export type DuetDatePickerDirection = "left" | "right"
 
-const DISALLOWED_CHARACTERS = /[^0-9\.\-\/\s]+/g;
+const DISALLOWED_CHARACTERS = /[^0-9\.\-\/\s]+/g
 const TRANSITION_MS = 300
 
 export type DateDisabledPredicate = (date: Date) => boolean
@@ -291,6 +291,14 @@ export class DuetDatePicker implements ComponentInterface {
     this.createDateFormatters()
   }
 
+  private datePickerTriggerButton: HTMLElement
+  private datePickerPopover: HTMLElement
+
+  componentDidLoad(): void {
+    this.datePickerTriggerButton = this.element.querySelector(".duet-date__toggle")
+    this.datePickerPopover = this.element.querySelector(".duet-date__dialog")
+  }
+
   @Watch("localization")
   createDateFormatters() {
     this.dateFormatShort = new Intl.DateTimeFormat(this.localization.locale, { day: "numeric", month: "long" })
@@ -349,6 +357,7 @@ export class DuetDatePicker implements ComponentInterface {
    */
   @Method() async show() {
     this.open = true
+    this.setPopupStyles()
     this.duetOpen.emit({
       component: "duet-date-picker",
     })
@@ -382,6 +391,29 @@ export class DuetDatePicker implements ComponentInterface {
       // iOS VoiceOver needs to wait for all transitions to finish.
       setTimeout(() => this.datePickerButton && this.datePickerButton.focus(), TRANSITION_MS + 200)
     }
+  }
+
+  private setPopupStyles() {
+    const triggerRect = this.datePickerTriggerButton.getBoundingClientRect()
+    const popupRect = this.datePickerPopover.getBoundingClientRect()
+    const viewportHeight = window.innerHeight
+
+    // Calculate desired position relative to the trigger element
+    let top = triggerRect.bottom
+    let left = triggerRect.left + (triggerRect.width - popupRect.width) / 2
+
+    // Check if the popup extends beyond the bottom of the viewport
+    const spaceBelow = viewportHeight - triggerRect.bottom
+    const spaceAbove = triggerRect.top
+
+    if (spaceBelow < popupRect.height && spaceAbove > popupRect.height) {
+      // If there's not enough space below and enough space above, open above the trigger button
+      top = triggerRect.top - popupRect.height
+    }
+
+    // Set position
+    this.datePickerPopover.style.top = `${top}px`
+    this.datePickerPopover.style.left = `${left}px`
   }
 
   /**
@@ -432,7 +464,9 @@ export class DuetDatePicker implements ComponentInterface {
   }
 
   private setFocusedDay(day: Date) {
-    this.focusedDay = clamp(day, parseISODate(this.min), parseISODate(this.max))
+    if (day) {
+      this.focusedDay = clamp(day, parseISODate(this.min), parseISODate(this.max))
+    }
   }
 
   private toggleOpen = (e: Event) => {
